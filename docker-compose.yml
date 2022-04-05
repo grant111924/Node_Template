@@ -1,0 +1,46 @@
+version: '3'
+services: 
+    mongo:
+        image: mongo:4.1.6
+        restart: always
+        ports:
+            - 27017:27017
+        networks:
+            - MONGO
+        volumes:
+            - ./docker-entrypoint-initdb.d/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: mongoadmin
+            MONGO_INITDB_ROOT_PASSWORD: mongoadmin
+            MONGO_INITDB_DATABASE: car
+    mongo-express:
+        image: mongo-express
+        restart: always
+        environment:
+            ME_CONFIG_MONGODB_URL: "mongodb://mongoadmin:mongoadmin@mongo:27017"
+            ME_CONFIG_OPTIONS_EDITORTHEME: 3024-night
+            ME_CONFIG_BASICAUTH_USERNAME: mongoexpress
+            ME_CONFIG_BASICAUTH_PASSWORD: mongoexpress
+            ME_CONFIG_MONGODB_ADMINUSERNAME: mongoadmin
+            ME_CONFIG_MONGODB_ADMINPASSWORD: mongoadmin
+        networks:
+            - MONGO
+        depends_on:
+            - mongo
+        ports:
+            - 8081:8081
+    dev:
+        image: node:16
+        volumes: 
+            - .:/usr/src/service
+        working_dir: /usr/src/service
+        command: tail -F anything
+        ports: 
+            - 3111:3111
+        networks:
+            - MONGO
+        depends_on:
+            - mongo
+networks:
+    MONGO:
+        name: MONGO
