@@ -1,6 +1,6 @@
 import express from 'express'
 import swaggerJsdoc from 'swagger-jsdoc';
-
+import axios from 'axios';
 // import { verifyToken } from '../middlewares/authJwt';
 // import { checkDuplicateUser} from '../middlewares/verifyRegister'
 import User from '../controllers/user.js'
@@ -18,7 +18,15 @@ const user = new User();
  *              description: Suceess
  *        
  */
-router.get('/list' ,(req, res) => {
+router.get('/list' , async(req, res) => {
+    let response = await axios.get('http://localhost:3100/api/files/GrantHuang/text.txt')
+    console.log(response.data)
+    // .then(res => {
+        
+    //     console.log(res.status)
+    // }).catch(err => {
+    //     console.log(err.response.status)
+    // })
     user.list(req,res)
 })
 
@@ -39,6 +47,7 @@ router.get('/list' ,(req, res) => {
  *        
  */
 router.get('/:user_name',(req, res) => {
+
     user.userInfo(req,res)
 })
 

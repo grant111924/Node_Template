@@ -7,39 +7,62 @@ export default class User {
     async register(req, res, next) {
         let username = req.body.user_name;
         let userpassword = req.body.user_password;
-        try {
-            const userinfo = {
-                user_name: username,
-                user_password: userpassword,
-                create_time: moment().format('YYYY-MM-DD HH:mm')
+        const userinfo = {
+            user_name: username,
+            user_password: userpassword,
+            create_time: moment().format('YYYY-MM-DD HH:mm')
+        }
+        
+
+        UserModel.find({
+            user_name: username
+        }).then(async (res) => {  
+            if(res.length > 0){
+                throw new Error("Acount Exist") 
+            }else{
+                console.log("register userinfo",userinfo)
+                await UserModel.create(userinfo,(err) => {
+                    if (err) return handleError(err);
+                })
+                res.json({
+                    code: RESULT.SUCCESS.code,
+                    msg: RESULT.SUCCESS.msg,
+                    data: 'Register Success',
+                })
             }
-            console.log("register userinfo",userinfo)
-            await UserModel.create(userinfo,(err) => {
-                if (err) return handleError(err);
-            })
-            res.json({
-                code: RESULT.SUCCESS.code,
-                msg: RESULT.SUCCESS.msg,
-                data: 'Register Success',
-            })
-        } catch (err) {
-            console.log(err)
+        }).catch((err) => {
+            console.log("error",err.message)
             res.json({
                 code: RESULT.FAILD.code,
                 msg: RESULT.FAILD.msg,
                 data: 'Register Failed',
             })
-        }
-
+        })
     }
 
     async list(req,res,next){
         try {
+            const aggregate = UserModel.aggregate()
+            const data =  await aggregate.group({
+                _id: `$user_name`,
+                count: {
+                    $sum: `$size`
+                }
+            })
+            .match(
+                {
+                    _id: "grant"
+                }
+            )
+            // .exec((err, result) => {
+            //     console.log(result)
+            // })
+
             const userList = await UserModel.find();
             res.json({
                 code: RESULT.SUCCESS.code,
                 msg: RESULT.SUCCESS.msg,
-                data: JSON.stringify(userList),
+                data: data,
             })
         } catch (err) {
             console.log(err)

@@ -43,7 +43,7 @@ const userSchema = new Schema({
 //建立索引  提高查询效率
 userSchema.index({user_id: 1})
 
-const userModel = mongoose.model('userModel', userSchema,"userModel");
+const userModel = mongoose.model('userModel', userSchema, "userModel");
 
 export default userModel;
 
